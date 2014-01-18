@@ -1,0 +1,3 @@
+#! /usr/bin/env bash
+
+rsync -avz current/Volumes/<Volume>/ /Volumes/<Volume>

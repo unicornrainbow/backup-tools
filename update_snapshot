@@ -1,0 +1,40 @@
+#! /usr/bin/env ruby
+#
+# Updates a backup snapshot. Based on http://www.mikerubel.org/computers/rsync_snapshots/
+
+require 'logger'
+require 'fileutils'
+
+class MultiIO
+  def initialize(*targets)
+     @targets = targets
+  end
+
+  def write(*args)
+    @targets.each {|t| t.write(*args)}
+  end
+
+  def close
+    @targets.each(&:close)
+  end
+end
+
+LOG_FILE = File.expand_path("../backup.log", __FILE__)
+
+# Backup target named for todays date.
+SNAPSHOT_DATE = Time.now.strftime("%Y%m%d")
+TARGET = File.expand_path("../current", __FILE__)
+OPTIONS = "-avz --delete --delete-excluded --exclude-from '.backup_excludes'"
+
+$logger = Logger.new(MultiIO.new(STDOUT, File.open(LOG_FILE, "a")))
+
+def backup(path)
+  parent = path.split("/").tap(&:pop).join("/")
+  sync_to_path = "#{TARGET}#{parent}"
+  cmd = %{rsync #{OPTIONS} "#{path}" "#{sync_to_path}"}
+  $logger.info `#{cmd}` # Run command
+  $logger.info "Running: #{cmd}"
+end
+
+
+backup "/Volumes/<Volume>"

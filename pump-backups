@@ -1,0 +1,26 @@
+# This pumps the backup, pushing local repositories to remote media, and then
+# backing remote media up to local disk for optional restortion and cloning.
+
+push() {
+  echo pushing $1
+  cd $1
+  git push
+}
+
+if [ -d "/Volumes/<Volume>" ]; then
+  # NOTE: This is only push the current head, whatever that might be.
+  push ~/<Project>
+  # push ~/...
+
+  # List of active projects read from text file, one per line.
+  active_projects=${BASH_SOURCE[0]/%pump-backups/config/active_projects.txt}
+
+  # Active Projects
+  while read p; do
+    push ~/projects/$p
+  done < $active_projects
+
+  # Backup Remote media
+  cd ~/Backups/<Remote Media>
+  ./update_snapshot  # Auto snap collecting in the future. Keeps your data.
+fi

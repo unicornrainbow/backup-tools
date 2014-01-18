@@ -1,0 +1,6 @@
+#! /usr/bin/env bash
+#
+# Unmounts a volumn by name on OS X
+
+disk=$(diskutil list | grep <Volume Name> | awk '{ print $6}')
+diskutil unmount "/dev/$disk"
